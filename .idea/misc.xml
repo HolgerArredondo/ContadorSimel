@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout-sw600dp/cf_01.xml" value="0.33" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/activity_main.xml" value="0.18072916666666666" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cf_01.xml" value="0.15" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_10_1.xml" value="0.33" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_12_1.xml" value="0.34739583333333335" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_14_1.xml" value="0.34739583333333335" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_16_1.xml" value="0.34739583333333335" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_4_1.xml" value="0.33" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_4_2.xml" value="0.25" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_8_1.xml" value="0.33" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/cu_botones_8_2.xml" value="0.33" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/ejemplo.xml" value="0.185546875" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/login.xml" value="0.15238879736408567" />
+        <entry key="..\:/Users/holger/Documents/EMIF/2021/ContadorSimel/app/src/main/res/layout/splash.xml" value="0.2222222222222222" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

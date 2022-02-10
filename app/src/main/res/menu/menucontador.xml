@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item android:id="@+id/item1"
+        android:title="Terminar jornada" />
+
+    <item android:id="@+id/camion"
+        android:title="Registro Conteo Camión/Avión" />
+
+    <item android:id="@+id/fdi"
+        android:title="Conteo fuera de intentos" />
+
+    <item android:id="@+id/cambio"
+        android:title="Cambio Camión/Avión" />
+</menu>

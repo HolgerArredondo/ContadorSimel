@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">CONTADORSIMEL</string>
+    <string name="appContador">01_contador</string>
+    <string name="fase">1</string>
+    <string name="app_ver">1.0</string>
+    <string name="flujo">Contador</string>
+
+    <string name="numero_version">01</string>
+
+
+    <string name="bkp_dir">/sdcard/colef/simel/contador_1/</string>
+
+</resources>
