@@ -47,11 +47,10 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 	Db db = new Db(ourContext);
 //	static String lastIdCounter;
 //	static int sub = 1;
-	
+
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-	
+	//hola mundo
 	String fechaJornada;
-	
 	
 	String provider;
 	
