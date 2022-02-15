@@ -688,7 +688,7 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 
 	public void setHeader(String genero){
 
-		Bundle extras = getIntent().getExtras();
+//		Bundle extras = getIntent().getExtras();
 		String idJornada = "";
 		String psw = db.getRow("sesion", "psw", "", "");
 
@@ -706,7 +706,8 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 				.append("0").append("', '")
 				.append(psw).append("', '")
 				.append(db.getRow("sesion", "user", "", "")).append("', '")
-				.append(extras.getString("idJornada")).append("', '")
+				//.append(extras.getString("idJornada")).append("', '")
+				.append(db.getField("idJornada")).append("', '")
 
 				.append(genero).append("', '")
 				.append("1").append("', '")
@@ -851,7 +852,7 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 
 	public void setHeader2(String genero){
 
-		Bundle extras = getIntent().getExtras();
+	//	Bundle extras = getIntent().getExtras();
 		String idJornada = "";
 //		String tipoJornada = "";
 		String psw = db.getRow("sesion", "psw", "", "");
@@ -892,7 +893,8 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 
 			header2
 				//.append("tipoJornada = '").append(extras.getString("tipoJornada")).append("', ")
-				.append(extras.getString("tipoJornada")).append("', '")
+				//.append(extras.getString("tipoJornada")).append("', '")
+				.append(db.getField("idJornada")).append("', '")
 
 //				.append("marked = '0', ")
 				.append("0").append("', '")
@@ -904,7 +906,8 @@ public class Cf extends AppCompatActivity implements PopupMenu.OnMenuItemClickLi
 				.append(db.getRow("sesion", "user", "", "")).append("', '")
 
 //				.append("idJornada = '").append(idJornada).append("'")
-				.append(extras.getString("idJornada")).append("', '")
+				//.append(extras.getString("idJornada")).append("', '")
+				.append(db.getField("idJornada")).append("', '")
 
 //				.append("iniJornada = '").append(fechaJornada).append("', ")
 //				.append(fechaJornada).append("', '")

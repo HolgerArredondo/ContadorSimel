@@ -36,7 +36,7 @@ public class SplashScreen extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent("com.contadorsimel.Login"));
-			//	startActivity(new Intent("com.contadorsimel.Resumen"));
+//				startActivity(new Intent("com.contadorsimel.Resumen"));
 //				startActivity(new Intent("com.contadorsimel._MainActivity"));
 //				startActivity(new Intent("com.contadorsimel.Cf"));
 			}

@@ -64,22 +64,22 @@ public class Login extends AppCompatActivity {
 
 		super.onCreate(saveInstanceState);
 
-		setContentView(R.layout.pruebaimagen);
+//		setContentView(R.layout.pruebaimagen);
+//
+//		ImageView iv = (ImageView) findViewById(R.id.imageView2);
+//		Button btn = (Button) findViewById(R.id.button2);
+//
+//		btn.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View view) {
+//
+//				BitmapDrawable bitmapDrawable = (BitmapDrawable) iv.getDrawable();
+//				Bitmap bitmap = bitmapDrawable.getBitmap();
+//				saveTOGallery(bitmap);
+//			}
+//		});
 
-		ImageView iv = (ImageView) findViewById(R.id.imageView2);
-		Button btn = (Button) findViewById(R.id.button2);
-
-		btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-
-				BitmapDrawable bitmapDrawable = (BitmapDrawable) iv.getDrawable();
-				Bitmap bitmap = bitmapDrawable.getBitmap();
-				saveTOGallery(bitmap);
-			}
-		});
-
-//		setContentView(R.layout.login);
+		setContentView(R.layout.login);
 
 //		setContentView(R.layout.cu_botones_8_2);
 //
@@ -116,20 +116,20 @@ public class Login extends AppCompatActivity {
 //
 //		setContentView(R.layout.login);
 //////
-//		txtMsg = (TextView) findViewById(R.id.toSend);
-//		txtMsg.setTextColor(Color.RED);
-//		txtMsg.setText("");
-//		btnUpdate = (Button) findViewById(R.id.btnUpdate);
+		txtMsg = (TextView) findViewById(R.id.toSend);
+		txtMsg.setTextColor(Color.RED);
+		txtMsg.setText("");
+		btnUpdate = (Button) findViewById(R.id.btnUpdate);
+////
+		btnUpdate.setVisibility(View.GONE);
 //////
-//		btnUpdate.setVisibility(View.GONE);
-//////
-//		if (Integer.parseInt(db.getRow("tblContadorSimel", "COUNT(*)", "marked", "0")) > 0)
-//			blink("EXISTEN FOLIOS PENDIENTES POR ENVIAR.");
+		if (Integer.parseInt(db.getRow("tblContadorSimel", "COUNT(*)", "marked", "0")) > 0)
+			blink("EXISTEN FOLIOS PENDIENTES POR ENVIAR.");
 //		else {
 //			//txt.setText("");
 //			checkUpdate();
 //		}
-//		loginCheck();
+		loginCheck();
 
 	}
 

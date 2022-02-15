@@ -1,8 +1,15 @@
 package com.contadorsimel;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -12,8 +19,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +34,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.android.volley.toolbox.HttpResponse;
+import com.google.firebase.crashlytics.buildtools.reloc.org.apache.http.client.methods.HttpPost;
+
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -58,122 +75,122 @@ public class Menu extends AppCompatActivity {
 //
 	public void defineType() {
 		setContentView(R.layout.menu);
-//		if(db.getRow("sesion", "tipo", "", "").equals("Supervisor")
-//				|| db.getRow("sesion", "tipo", "", "").equals("Asistente"))
-//			supervisor();
-//		 else
+		if(db.getRow("sesion", "tipo", "", "").equals("Supervisor")
+				|| db.getRow("sesion", "tipo", "", "").equals("Asistente"))
+			supervisor();
+		 else
 			 interviewer(db.getSesion("psw"));
 	}
 //
-//	public void supervisor() {
-//		final Button btn1 = (Button) findViewById(R.id.btn_1);
-//		final Button btn2 = (Button) findViewById(R.id.btn_2);
-//		Button btn3 = (Button) findViewById(R.id.btn_3);
-//		Button btn4 = (Button) findViewById(R.id.btn_4);
-//		Button btn5 = (Button) findViewById(R.id.btn_5);
-//
-//		Toast.makeText(ourContext,"Hola " + db.getRow("sesion", "nombre", "", ""), Toast.LENGTH_SHORT).show();
-//
-//		btn1.setText("Enviar cuestionarios a CYAN");
-//		btn2.setText("Reporte de jornada");
-//		btn3.setText("Comprobar conectividad de envio");
-//		btn4.setText("Actualizar usuarios");
-//		btn5.setText("Cerrar sesi�n");
-//
-//		btn4.setVisibility(View.GONE);
-//
-//		btn2.setVisibility(View.GONE);
-//
-//		btn1.setOnClickListener(new OnClickListener() {
-//
-//			public void onClick(View v) {
-////				send(btn1);
-//				send();
-//			}
-//		});
-//
-//
-//
-//		btn3.setOnClickListener(new OnClickListener() {
-//
-//			public void onClick(View v) {
-//				final ProgressDialog progressBar = new ProgressDialog(v.getContext());
-//				progressBar.setCancelable(false);
-//				progressBar
-//						.setMessage("Revisando conexi�n de internet. Puede tardar varios segundos ...");
-//				progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//
-//				final Handler mihand = new Handler();
-//
-//				final Runnable msj1 = new Runnable() {
-//
-//					public void run() {
-//
-//						Toast.makeText(
-//								ourContext,
-//								"Conexi�n a internet exitosa. Proceda a enviar folios.",
-//								Toast.LENGTH_SHORT).show();
-//					}
-//				};
-//
-//				final Runnable msj2 = new Runnable() {
-//
-//					public void run() {
-//
-//						Toast.makeText(
-//								ourContext,
-//								"No se encuentra con acceso a internet. NO ENVIAR FOLIOS.",
-//								Toast.LENGTH_LONG).show();
-//					}
-//				};
-//
-//				progressBar.show();
-//
-//				new Thread(new Runnable() {
-//
-//					public void run() {
-//						try {
-//							final URL url = new URL("http://www.google.com");
-//
-//							final HttpURLConnection urlConn = (HttpURLConnection) url
-//									.openConnection();
-//							urlConn.setConnectTimeout(500);
-//
-//							final long startTime = System.currentTimeMillis();
-//							urlConn.connect();
-//							final long endTime = System.currentTimeMillis();
-//							if (urlConn.getResponseCode() == HttpURLConnection.HTTP_OK)
-//								mihand.post(msj1);
-//							progressBar.dismiss();
-//							return;
-//						} catch (final MalformedURLException e1) {
-//							e1.printStackTrace();
-//						} catch (final IOException e) {
-//							e.printStackTrace();
-//						}
-//						mihand.post(msj2);
-//						progressBar.dismiss();
-//						return;
-//
-//					}
-//
-//				}).start();
-//
-//			}
-//		});
-//
+	public void supervisor() {
+		final Button btn1 = (Button) findViewById(R.id.btn_1);
+		final Button btn2 = (Button) findViewById(R.id.btn_2);
+		Button btn3 = (Button) findViewById(R.id.btn_3);
+		Button btn4 = (Button) findViewById(R.id.btn_4);
+		Button btn5 = (Button) findViewById(R.id.btn_5);
+
+		Toast.makeText(ourContext,"Hola " + db.getRow("sesion", "nombre", "", ""), Toast.LENGTH_SHORT).show();
+
+		btn1.setText("Enviar cuestionarios a CYAN");
+		btn2.setText("Reporte de jornada");
+		btn3.setText("Comprobar conectividad de envio");
+		btn4.setText("Actualizar usuarios");
+		btn5.setText("Cerrar sesión");
+
+		btn4.setVisibility(View.GONE);
+
+		btn2.setVisibility(View.GONE);
+
+		btn1.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+//				send(btn1);
+				send();
+			}
+		});
+
+
+
+		btn3.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				final ProgressDialog progressBar = new ProgressDialog(v.getContext());
+				progressBar.setCancelable(false);
+				progressBar
+						.setMessage("Revisando conexión de internet. Puede tardar varios segundos ...");
+				progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+				final Handler mihand = new Handler();
+
+				final Runnable msj1 = new Runnable() {
+
+					public void run() {
+
+						Toast.makeText(
+								ourContext,
+								"Conexión a internet exitosa. Proceda a enviar folios.",
+								Toast.LENGTH_SHORT).show();
+					}
+				};
+
+				final Runnable msj2 = new Runnable() {
+
+					public void run() {
+
+						Toast.makeText(
+								ourContext,
+								"No se encuentra con acceso a internet. NO ENVIAR FOLIOS.",
+								Toast.LENGTH_LONG).show();
+					}
+				};
+
+				progressBar.show();
+
+				new Thread(new Runnable() {
+
+					public void run() {
+						try {
+							final URL url = new URL("http://www.google.com");
+
+							final HttpURLConnection urlConn = (HttpURLConnection) url
+									.openConnection();
+							urlConn.setConnectTimeout(500);
+
+							final long startTime = System.currentTimeMillis();
+							urlConn.connect();
+							final long endTime = System.currentTimeMillis();
+							if (urlConn.getResponseCode() == HttpURLConnection.HTTP_OK)
+								mihand.post(msj1);
+							progressBar.dismiss();
+							return;
+						} catch (final MalformedURLException e1) {
+							e1.printStackTrace();
+						} catch (final IOException e) {
+							e.printStackTrace();
+						}
+						mihand.post(msj2);
+						progressBar.dismiss();
+						return;
+
+					}
+
+				}).start();
+
+			}
+		});
+
 //		btn4.setOnClickListener(new OnClickListener() {
 //			public void onClick(View v) {
 //				actualizarUsuarios();
 //			}
 //		});
-//
-//		btn5.setOnClickListener(new OnClickListener() {
-//			public void onClick(View v) {
-//				startActivity(new Intent("com.contadorsimel.Login"));
-//			}
-//		});
-//	}
+
+		btn5.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				startActivity(new Intent("com.contadorsimel.Login"));
+			}
+		});
+	}
 //
 	public void interviewer(final String KEY) {
 		final Button btn1 = (Button) findViewById(R.id.btn_hombre);
@@ -869,386 +886,386 @@ public class Menu extends AppCompatActivity {
 //	 * Envia todos los marked 0 o segun el id
 //	 * @param tag para envio o reenvio
 //	 */
-//	public void send() {
+	public void send() {
+
+//		btn.setClickable(false);
+
+		final ProgressDialog progressBkp = new ProgressDialog(ourActivity);
+		final ProgressDialog progressCyan = new ProgressDialog(ourActivity);
+
+		progressBkp.setCancelable(false);
+		progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
+		progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+		//
+		final HttpPost httppostBkp = new HttpPost(
+		//		"http://elcolef.net/Emif/envio/respaldoAmmPeua_204.php");
+				"http://elcolef.net/Emif/envio/respaldoContador_1.php");
+
+		final HttpPost httppostGps = new HttpPost(
+				"http://emif.mx/paradigma/envio/gpsContadorSimel.php");
+				//"http://www.colef.mx/emif/cyan/nte/sender/gps204.php");
+
+		final HttpPost httppost = new HttpPost(
+				//"http://www.colef.mx/emif/cyan/nte/envio/ammContadorPeua_204.php");
+				"http://emif.mx/paradigma/envio/envioTabletContadorV2Simel.php");
+
+
+
+//		final HttpPost httppostTest = new HttpPost(
+//				"http://www.colef.mx/emif/cyan/nte/sender/pdsf20t2_test.php");
+
+		// Time Out
+		HttpParams httpParameters = new BasicHttpParams();
+		int timeoutConnection = 10000;
+		HttpConnectionParams.setConnectionTimeout(httpParameters,
+				timeoutConnection);
+		int timeoutSocket = 10000;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		//
+
+		final HttpClient httpclient = new DefaultHttpClient(httpParameters);
+		final Handler mihand = new Handler();
+
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+		final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
+//		final ArrayList<String> idJornadasGps = db.getJornadasGps();
+		final int sizeBkp = idJornadasBkp.size();
+
+
+		final int sizeGps = db.getJornadasGps();
+
+		final int size = db.getCountTbl();
+
+
+
+
+
+		final Handler cambio = new Handler() {
+			public void handleMessage(Message msg) {
+				progressCyan.setCancelable(false);
+				progressCyan.setMessage("Enviando");
+				progressCyan
+						.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+				progressCyan.setProgress(0);
+				progressCyan.setMax(size);
+				progressCyan.setProgressNumberFormat(null);
+				progressCyan.show();
+			}
+		};
+
+		final Handler handle = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				progressCyan.incrementProgressBy(1);
+			}
+		};
+
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+
+			if (sizeBkp > 0) {
+
+				/********************************/
+				progressBkp.show();
+				new Thread(new Runnable() {
+					public void run() {
+				    	int i = 0, c = 0;
+						boolean j = false, k = false, l = false, m = false, n = false, o = false;
+
+						// envia el bkp
+						do {
+							ArrayList<String> resp = db.selectRespaldo(idJornadasBkp.get(i));
+
+							List<NameValuePair> nvp = new ArrayList<NameValuePair>();
+							nvp.add(new BasicNameValuePair("resultado", "" + resp));
+							nvp.add(new BasicNameValuePair("idJornada",
+									idJornadasBkp.get(i)));
+
+
+							HttpResponse response = null;
+							try {
+								httppostBkp.setEntity(new UrlEncodedFormEntity(nvp));
+								response = httpclient.execute(httppostBkp);
+								i++;
+							} catch (UnsupportedEncodingException e1) {
+								i = sizeBkp;
+								j = true;
+							}
+						catch (ClientProtocolException e) {
+								i = sizeBkp;
+								k = true;
+						} catch (IOException e) {
+								i = sizeBkp;
+								l = true;
+							}
+						} while (i < sizeBkp);
+
+
+						if (j){
+							mihand.post(imprimeThread2("UnsupportedEncodingException J"));
+							progressBkp.dismiss();
+						}
+						else if (k){
+							mihand.post(imprimeThread2("ClientProtocolException K"));
+							progressBkp.dismiss();
+						}
+						else if(l){
+							mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN."));
+							progressBkp.dismiss();
+						}
+						else {
+							//aqui va el envio de gps
+							i = 0;
+
+							if (sizeGps > 0) {
+								do {
+
+									final HashMap<String, List<String>> data = db
+											.selectCuestionarioGps();
+	//
+									List<NameValuePair> nvp = new ArrayList<NameValuePair>();
+
+									nvp.add(new BasicNameValuePair("resultado", data
+											.get("resultado").get(0).toString()));
+									nvp.add(new BasicNameValuePair("app", data
+											.get("app").get(0).toString()));
+
+									HttpResponse response = null;
+
+
+									try{
+
+										httppostGps.setEntity(new UrlEncodedFormEntity(nvp));
+										response = httpclient.execute(httppostGps);
+
+									// Recibe
+									String jsonResult = inputStreamToString(
+											response.getEntity().getContent())
+											.toString();
+									// pasa json
+									JSONObject object = new JSONObject(jsonResult);
+
+									// index
+									boolean status = object.getBoolean("status");
+
+									if (status) {
+										db.setMarkedGps(data.get("id").get(0).toString());
+										i++;
+									} else {
+										i = sizeGps;
+										k = true;
+									}
+
+									} catch (UnsupportedEncodingException e1) {
+										// json mal parsiado
+										progressCyan.dismiss();
+
+										i = sizeGps;
+										l = true;
+
+									} catch (JSONException e) {
+										// valor null en json
+										progressCyan.dismiss();
+										i = sizeGps;
+										m = true;
+
+									} catch (ClientProtocolException e) {
+										// time out expiro
+										progressCyan.dismiss();
+										i = sizeGps;
+										n = true;
+
+									} catch (IOException e) {
+										// http reponse invalido
+										i = sizeGps;
+										o = true;
+									}
+
+
+								} while (i < sizeGps);
+							}
+
+							if (j){
+								mihand.post(imprimeThread2("UnsupportedEncodingException J"));
+								progressBkp.dismiss();
+							}
+							else if (k){
+								mihand.post(imprimeThread2("ClientProtocolException K"));
+								progressBkp.dismiss();
+
+							}
+							else if (l){
+								mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN."));
+								progressBkp.dismiss();
+							}
+
+
+
+							else {
+
+								//Bkp completo
+								progressBkp.dismiss();
+
+								i = 0;
+								cambio.sendEmptyMessage(0);
+								do {
+									final HashMap<String, List<String>> data = db
+											.selectCuestionario("4", "");
+
+									String tablet = db.getLastExistentField("tablet");
+									String idJornada = data.get("idJornada").get(0).toString();
+									String clave = data.get("clave").get(0).toString();
+									String fecha = data.get("fecha").get(0).toString();
+									String app = data.get("app").get(0).toString();
+
+									List<NameValuePair> nvp = new ArrayList<NameValuePair>();
+
+									nvp.add(new BasicNameValuePair("resultado", data
+											.get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()")    ));
+									nvp.add(new BasicNameValuePair("tablet", tablet));
+									nvp.add(new BasicNameValuePair("idJornada",
+											idJornada));
+									nvp.add(new BasicNameValuePair("clave", clave));
+									nvp.add(new BasicNameValuePair("fecha", fecha));
+									nvp.add(new BasicNameValuePair("app", app));
+
+									Log.i("",  data
+											.get("resultado").get(0).toString());
+
+									HttpResponse response = null;
+									try{
+//										if(data.get("ciudad").get(0).toString().equals("prueba")){
 //
-////		btn.setClickable(false);
 //
-//		final ProgressDialog progressBkp = new ProgressDialog(ourActivity);
-//		final ProgressDialog progressCyan = new ProgressDialog(ourActivity);
-//
-//		progressBkp.setCancelable(false);
-//		progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
-//		progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//
-//		//
-//		final HttpPost httppostBkp = new HttpPost(
-//		//		"http://elcolef.net/Emif/envio/respaldoAmmPeua_204.php");
-//				"http://elcolef.net/Emif/envio/respaldoContador_1.php");
-//
-//		final HttpPost httppostGps = new HttpPost(
-//				"http://emif.mx/paradigma/envio/gpsContadorSimel.php");
-//				//"http://www.colef.mx/emif/cyan/nte/sender/gps204.php");
-//
-//		final HttpPost httppost = new HttpPost(
-//				//"http://www.colef.mx/emif/cyan/nte/envio/ammContadorPeua_204.php");
-//				"http://emif.mx/paradigma/envio/envioTabletContadorV2Simel.php");
-//
-//
-//
-////		final HttpPost httppostTest = new HttpPost(
-////				"http://www.colef.mx/emif/cyan/nte/sender/pdsf20t2_test.php");
-//
-//		// Time Out
-//		HttpParams httpParameters = new BasicHttpParams();
-//		int timeoutConnection = 10000;
-//		HttpConnectionParams.setConnectionTimeout(httpParameters,
-//				timeoutConnection);
-//		int timeoutSocket = 10000;
-//		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-//		//
-//
-//		final HttpClient httpclient = new DefaultHttpClient(httpParameters);
-//		final Handler mihand = new Handler();
-//
-//		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-//		NetworkInfo netInfo = cm.getActiveNetworkInfo();
-//
-//		final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
-////		final ArrayList<String> idJornadasGps = db.getJornadasGps();
-//		final int sizeBkp = idJornadasBkp.size();
-//
-//
-//		final int sizeGps = db.getJornadasGps();
-//
-//		final int size = db.getCountTbl();
-//
-//
-//
-//
-//
-//		final Handler cambio = new Handler() {
-//			public void handleMessage(Message msg) {
-//				progressCyan.setCancelable(false);
-//				progressCyan.setMessage("Enviando");
-//				progressCyan
-//						.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//				progressCyan.setProgress(0);
-//				progressCyan.setMax(size);
-//				progressCyan.setProgressNumberFormat(null);
-//				progressCyan.show();
-//			}
-//		};
-//
-//		final Handler handle = new Handler() {
-//			@Override
-//			public void handleMessage(Message msg) {
-//				progressCyan.incrementProgressBy(1);
-//			}
-//		};
-//
-//		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-//
-//			if (sizeBkp > 0) {
-//
-//				/********************************/
-//				progressBkp.show();
-//				new Thread(new Runnable() {
-//					public void run() {
-//				    	int i = 0, c = 0;
-//						boolean j = false, k = false, l = false, m = false, n = false, o = false;
-//
-//						// envia el bkp
-//						do {
-//							ArrayList<String> resp = db.selectRespaldo(idJornadasBkp.get(i));
-//
-//							List<NameValuePair> nvp = new ArrayList<NameValuePair>();
-//							nvp.add(new BasicNameValuePair("resultado", "" + resp));
-//							nvp.add(new BasicNameValuePair("idJornada",
-//									idJornadasBkp.get(i)));
-//
-//
-//							HttpResponse response = null;
-//							try {
-//								httppostBkp.setEntity(new UrlEncodedFormEntity(nvp));
-//								response = httpclient.execute(httppostBkp);
-//								i++;
-//							} catch (UnsupportedEncodingException e1) {
-//								i = sizeBkp;
-//								j = true;
-//							}
-//						catch (ClientProtocolException e) {
-//								i = sizeBkp;
-//								k = true;
-//						} catch (IOException e) {
-//								i = sizeBkp;
-//								l = true;
-//							}
-//						} while (i < sizeBkp);
-//
-//
-//						if (j){
-//							mihand.post(imprimeThread2("UnsupportedEncodingException J"));
-//							progressBkp.dismiss();
-//						}
-//						else if (k){
-//							mihand.post(imprimeThread2("ClientProtocolException K"));
-//							progressBkp.dismiss();
-//						}
-//						else if(l){
-//							mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN."));
-//							progressBkp.dismiss();
-//						}
-//						else {
-//							//aqui va el envio de gps
-//							i = 0;
-//
-//							if (sizeGps > 0) {
-//								do {
-//
-//									final HashMap<String, List<String>> data = db
-//											.selectCuestionarioGps();
-//	//
-//									List<NameValuePair> nvp = new ArrayList<NameValuePair>();
-//
-//									nvp.add(new BasicNameValuePair("resultado", data
-//											.get("resultado").get(0).toString()));
-//									nvp.add(new BasicNameValuePair("app", data
-//											.get("app").get(0).toString()));
-//
-//									HttpResponse response = null;
-//
-//
-//									try{
-//
-//										httppostGps.setEntity(new UrlEncodedFormEntity(nvp));
-//										response = httpclient.execute(httppostGps);
-//
-//									// Recibe
-//									String jsonResult = inputStreamToString(
-//											response.getEntity().getContent())
-//											.toString();
-//									// pasa json
-//									JSONObject object = new JSONObject(jsonResult);
-//
-//									// index
-//									boolean status = object.getBoolean("status");
-//
-//									if (status) {
-//										db.setMarkedGps(data.get("id").get(0).toString());
-//										i++;
-//									} else {
-//										i = sizeGps;
-//										k = true;
-//									}
-//
-//									} catch (UnsupportedEncodingException e1) {
-//										// json mal parsiado
-//										progressCyan.dismiss();
-//
-//										i = sizeGps;
-//										l = true;
-//
-//									} catch (JSONException e) {
-//										// valor null en json
-//										progressCyan.dismiss();
-//										i = sizeGps;
-//										m = true;
-//
-//									} catch (ClientProtocolException e) {
-//										// time out expiro
-//										progressCyan.dismiss();
-//										i = sizeGps;
-//										n = true;
-//
-//									} catch (IOException e) {
-//										// http reponse invalido
-//										i = sizeGps;
-//										o = true;
-//									}
-//
-//
-//								} while (i < sizeGps);
-//							}
-//
-//							if (j){
-//								mihand.post(imprimeThread2("UnsupportedEncodingException J"));
-//								progressBkp.dismiss();
-//							}
-//							else if (k){
-//								mihand.post(imprimeThread2("ClientProtocolException K"));
-//								progressBkp.dismiss();
-//
-//							}
-//							else if (l){
-//								mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN."));
-//								progressBkp.dismiss();
-//							}
-//
-//
-//
-//							else {
-//
-//								//Bkp completo
-//								progressBkp.dismiss();
-//
-//								i = 0;
-//								cambio.sendEmptyMessage(0);
-//								do {
-//									final HashMap<String, List<String>> data = db
-//											.selectCuestionario("4", "");
-//
-//									String tablet = db.getLastExistentField("tablet");
-//									String idJornada = data.get("idJornada").get(0).toString();
-//									String clave = data.get("clave").get(0).toString();
-//									String fecha = data.get("fecha").get(0).toString();
-//									String app = data.get("app").get(0).toString();
-//
-//									List<NameValuePair> nvp = new ArrayList<NameValuePair>();
-//
-//									nvp.add(new BasicNameValuePair("resultado", data
-//											.get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()")    ));
-//									nvp.add(new BasicNameValuePair("tablet", tablet));
-//									nvp.add(new BasicNameValuePair("idJornada",
-//											idJornada));
-//									nvp.add(new BasicNameValuePair("clave", clave));
-//									nvp.add(new BasicNameValuePair("fecha", fecha));
-//									nvp.add(new BasicNameValuePair("app", app));
-//
-//									Log.i("",  data
-//											.get("resultado").get(0).toString());
-//
-//									HttpResponse response = null;
-//									try{
-////										if(data.get("ciudad").get(0).toString().equals("prueba")){
-////
-////
-////											httppostTest.setEntity(new UrlEncodedFormEntity(nvp));
-////											response = httpclient.execute(httppostTest);
-////										}
-////										else{
-//											httppost.setEntity(new UrlEncodedFormEntity(nvp));
-//											response = httpclient.execute(httppost);
-////										}
-//										// Recibe
-//										String jsonResult = inputStreamToString(
-//												response.getEntity().getContent())
-//												.toString();
-//										// pasa json
-//										JSONObject object = new JSONObject(jsonResult);
-//
-//										// index
-//										boolean status = object.getBoolean("status");
-//
-//										if (status) {
-//											c++;
-//											db.setMarked(data.get("id").get(0).toString());
-//											handle.sendMessage(handle.obtainMessage());
-//											i++;
-//										} else {
-//											i = size;
-//											k = true;
+//											httppostTest.setEntity(new UrlEncodedFormEntity(nvp));
+//											response = httpclient.execute(httppostTest);
 //										}
+//										else{
+											httppost.setEntity(new UrlEncodedFormEntity(nvp));
+											response = httpclient.execute(httppost);
+//										}
+										// Recibe
+										String jsonResult = inputStreamToString(
+												response.getEntity().getContent())
+												.toString();
+										// pasa json
+										JSONObject object = new JSONObject(jsonResult);
+
+										// index
+										boolean status = object.getBoolean("status");
+
+										if (status) {
+											c++;
+											db.setMarked(data.get("id").get(0).toString());
+											handle.sendMessage(handle.obtainMessage());
+											i++;
+										} else {
+											i = size;
+											k = true;
+										}
+
+									} catch (UnsupportedEncodingException e1) {
+										// json mal parsiado
+										progressCyan.dismiss();
+										//btn.setClickable(true);
+										i = size;
+										l = true;
+
+									} catch (JSONException e) {
+										// valor null en json
+										progressCyan.dismiss();
+										//btn.setClickable(true);
+										i = size;
+										m = true;
+
+									} catch (ClientProtocolException e) {
+										// time out expiro
+										progressCyan.dismiss();
+										//btn.setClickable(true);
+										i = size;
+										n = true;
+
+									} catch (IOException e) {
+										// http reponse invalido
+										i = size;
+										o = true;
+									}
+
+//									i++;
+								} while (i < size);
+
+								progressCyan.dismiss();
+								//btn.setClickable(true);
 //
-//									} catch (UnsupportedEncodingException e1) {
-//										// json mal parsiado
-//										progressCyan.dismiss();
-//										//btn.setClickable(true);
-//										i = size;
-//										l = true;
+								if (j)
+									mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN.\nFaltaron por enviar: "
+											+ (size - c) + " folios"));
+								// fallo el insert
+								else if (k)
+									mihand.post(imprimeThread2("Error en la inserci�n del envio al servidor CYAN. Faltaron por enviar: "
+											+ (size - c) + " folios"));
+								else if (l) {
+									//mihand.post(imprimeThread2("TRONO L"));
+									mihand.post(imprimeThread2("Error en conversi�n de datos"));
+								}
+								else if (m) {
+									//mihand.post(imprimeThread2("TRONO M"));
+									mihand.post(imprimeThread2("Error con respuesta de servidor"));
+								}
+								else if (n) {
+									//mihand.post(imprimeThread2("TROMO N"));
+									mihand.post(imprimeThread2("Error en tiempo de respuesta"));
+								}
+								else if (o) {
+									//mihand.post(imprimeThread2("TRONO O"));
+									mihand.post(imprimeThread2("Error en URL de env�o"));
+								}
+								// envio exitoso
+								else
+									mihand.post(imprimeThread("Envio exitoso."));
+							}
+						}
+					}
+				}).start();
+
+				/********************************/
+
+			}
+				else {
+				Toast.makeText(ourContext, "No hay folios para enviar.",
+						Toast.LENGTH_SHORT).show();
+				//btn.setClickable(true);
+				}
+		}
+				else {
+			Toast.makeText(ourContext, "No hay conexi�n a Internet.",
+					Toast.LENGTH_SHORT).show();
+			//btn.setClickable(true);
+				}
+	}
 //
-//									} catch (JSONException e) {
-//										// valor null en json
-//										progressCyan.dismiss();
-//										//btn.setClickable(true);
-//										i = size;
-//										m = true;
+	public Runnable imprimeThread(final String MSG) {
+		final Runnable trono = new Runnable() {
+
+			public void run() {
+				Toast.makeText(ourContext, MSG, Toast.LENGTH_SHORT).show();
+			}
+		};
+		return trono;
+	}
 //
-//									} catch (ClientProtocolException e) {
-//										// time out expiro
-//										progressCyan.dismiss();
-//										//btn.setClickable(true);
-//										i = size;
-//										n = true;
-//
-//									} catch (IOException e) {
-//										// http reponse invalido
-//										i = size;
-//										o = true;
-//									}
-//
-////									i++;
-//								} while (i < size);
-//
-//								progressCyan.dismiss();
-//								//btn.setClickable(true);
-////
-//								if (j)
-//									mihand.post(imprimeThread2("El envio no se ha completado porque se perdio la conexi�n de internet con el CYAN.\nFaltaron por enviar: "
-//											+ (size - c) + " folios"));
-//								// fallo el insert
-//								else if (k)
-//									mihand.post(imprimeThread2("Error en la inserci�n del envio al servidor CYAN. Faltaron por enviar: "
-//											+ (size - c) + " folios"));
-//								else if (l) {
-//									//mihand.post(imprimeThread2("TRONO L"));
-//									mihand.post(imprimeThread2("Error en conversi�n de datos"));
-//								}
-//								else if (m) {
-//									//mihand.post(imprimeThread2("TRONO M"));
-//									mihand.post(imprimeThread2("Error con respuesta de servidor"));
-//								}
-//								else if (n) {
-//									//mihand.post(imprimeThread2("TROMO N"));
-//									mihand.post(imprimeThread2("Error en tiempo de respuesta"));
-//								}
-//								else if (o) {
-//									//mihand.post(imprimeThread2("TRONO O"));
-//									mihand.post(imprimeThread2("Error en URL de env�o"));
-//								}
-//								// envio exitoso
-//								else
-//									mihand.post(imprimeThread("Envio exitoso."));
-//							}
-//						}
-//					}
-//				}).start();
-//
-//				/********************************/
-//
-//			}
-//				else {
-//				Toast.makeText(ourContext, "No hay folios para enviar.",
-//						Toast.LENGTH_SHORT).show();
-//				//btn.setClickable(true);
-//				}
-//		}
-//				else {
-//			Toast.makeText(ourContext, "No hay conexi�n a Internet.",
-//					Toast.LENGTH_SHORT).show();
-//			//btn.setClickable(true);
-//				}
-//	}
-//
-//	public Runnable imprimeThread(final String MSG) {
-//		final Runnable trono = new Runnable() {
-//
-//			public void run() {
-//				Toast.makeText(ourContext, MSG, Toast.LENGTH_SHORT).show();
-//			}
-//		};
-//		return trono;
-//	}
-//
-//	public Runnable imprimeThread2(final String MSG) {
-//		final Runnable trono = new Runnable() {
-//
-//			public void run() {
-//				Toast.makeText(ourContext, MSG, Toast.LENGTH_LONG).show();
-//
-//			}
-//		};
-//		return trono;
-//	}
+	public Runnable imprimeThread2(final String MSG) {
+		final Runnable trono = new Runnable() {
+
+			public void run() {
+				Toast.makeText(ourContext, MSG, Toast.LENGTH_LONG).show();
+
+			}
+		};
+		return trono;
+	}
 //
 //	private StringBuilder inputStreamToString(InputStream is) {
 //		String rLine = "";
