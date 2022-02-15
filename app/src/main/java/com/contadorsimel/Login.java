@@ -1,7 +1,12 @@
 package com.contadorsimel;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,18 +20,28 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,25 +64,42 @@ public class Login extends AppCompatActivity {
 
 		super.onCreate(saveInstanceState);
 
-		setContentView(R.layout.cu_botones_8_2);
+		setContentView(R.layout.pruebaimagen);
 
-		Button btn1 = (Button) findViewById(R.id.btn_1);
-		Button btn2 = (Button) findViewById(R.id.btn_2);
-		Button btn3 = (Button) findViewById(R.id.btn_3);
-		Button btn4 = (Button) findViewById(R.id.btn_4);
-		Button btn5 = (Button) findViewById(R.id.btn_5);
-		Button btn6 = (Button) findViewById(R.id.btn_6);
-		Button btn7 = (Button) findViewById(R.id.btn_7);
-		Button btn8 = (Button) findViewById(R.id.btn_8);
+		ImageView iv = (ImageView) findViewById(R.id.imageView2);
+		Button btn = (Button) findViewById(R.id.button2);
 
-		btn1.setText("En cualquier sector de la economía (no lo tiene definido)");
-		btn2.setText("En cualquier sector de la economía (no lo tiene definido) En cualquier En dos");
-		btn3.setText("Visitar familiares o amistades en México");
-		btn4.setText("Para conocer México");
-		btn5.setText("Para trabajar en Estados Unidosn");
-		btn6.setText("Para vivir en Estados Unidos");
-		btn7.setText("Visitar familiares o amistades en Estados Unidos");
-		btn8.setText("Otra razón");
+		btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+
+				BitmapDrawable bitmapDrawable = (BitmapDrawable) iv.getDrawable();
+				Bitmap bitmap = bitmapDrawable.getBitmap();
+				saveTOGallery(bitmap);
+			}
+		});
+
+//		setContentView(R.layout.login);
+
+//		setContentView(R.layout.cu_botones_8_2);
+//
+//		Button btn1 = (Button) findViewById(R.id.btn_1);
+//		Button btn2 = (Button) findViewById(R.id.btn_2);
+//		Button btn3 = (Button) findViewById(R.id.btn_3);
+//		Button btn4 = (Button) findViewById(R.id.btn_4);
+//		Button btn5 = (Button) findViewById(R.id.btn_5);
+//		Button btn6 = (Button) findViewById(R.id.btn_6);
+//		Button btn7 = (Button) findViewById(R.id.btn_7);
+//		Button btn8 = (Button) findViewById(R.id.btn_8);
+//
+//		btn1.setText("En cualquier sector de la economía (no lo tiene definido)");
+//		btn2.setText("En cualquier sector de la economía (no lo tiene definido) En cualquier En dos");
+//		btn3.setText("Visitar familiares o amistades en México");
+//		btn4.setText("Para conocer México");
+//		btn5.setText("Para trabajar en Estados Unidosn");
+//		btn6.setText("Para vivir en Estados Unidos");
+//		btn7.setText("Visitar familiares o amistades en Estados Unidos");
+//		btn8.setText("Otra razón");
 
 //		btnH.setOnClickListener(new OnClickListener() {
 //			@Override
@@ -114,14 +146,17 @@ public class Login extends AppCompatActivity {
 		String TAG = Login.class.getName();
 		boolean connected = false;
 
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-				connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-			//we are connected to a network
-			connected = true;
-		}
-		else
-			connected = false;
+//		ConnectivityManager connectivityManager = (ConnectivityManager) ourContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+
+		connected = isConnected(ourContext);
+//		if(connectivityManager.getActiveNetworkInfo() != null && (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+//				connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)) {
+//			//we are connected to a network
+//			connected = true;
+//		}
+//		else
+//			connected = false;
 
 		if (connected) {
 			HashMap<String, String> inputs = new HashMap<String, String>();
@@ -316,4 +351,82 @@ public class Login extends AppCompatActivity {
 //	}
 
 
+	public static boolean isConnected(Context context){
+		ConnectivityManager
+				cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		return activeNetwork != null
+				&& activeNetwork.isConnectedOrConnecting();
+	}
+
+
+	private void saveTOGallery(Bitmap bitmap) {
+
+	//	Toast.makeText(getApplicationContext(), "Entro a btn 2:", Toast.LENGTH_LONG).show();//display the response on screen
+
+		OutputStream fos;
+		try {
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+
+				ContentValues values = new ContentValues();
+				values.put(MediaStore.MediaColumns.DISPLAY_NAME, "menuCategory");       //file name
+				values.put(MediaStore.MediaColumns.MIME_TYPE, "text/plain");        //file extension, will automatically add to file
+				values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/Kamen Rider Decade/");     //end "/" is not mandatory
+
+				Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);      //important!
+
+				OutputStream outputStream = getContentResolver().openOutputStream(uri);
+
+				outputStream.write("This is menu category data.".getBytes());
+
+				outputStream.close();
+
+//				ContentResolver resolver = getContentResolver();
+//				ContentValues contentValues = new ContentValues();
+//				contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Image_" + ".jpg");
+//				contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+//				contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "TestFolder");
+//
+//				Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+//				fos = resolver.openOutputStream(Objects.requireNonNull(imageUri));
+//				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//				Objects.requireNonNull(fos);
+
+
+				Toast.makeText(ourContext, "Full", Toast.LENGTH_LONG).show();
+			}
+			else {
+				String imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
+				String fileName = System.currentTimeMillis() + ".jpg";
+
+
+					File f = new File(imageDir, "AAA.txt");
+					f.createNewFile();
+					FileOutputStream fOut = new FileOutputStream(
+							f);
+					OutputStreamWriter myOutWriter = new OutputStreamWriter(
+							fOut);
+					myOutWriter.append("Hola mundo");
+
+					myOutWriter.close();
+					fOut.close();
+					Toast.makeText(getApplicationContext(), "Full 2", Toast.LENGTH_LONG).show();//display the response on screen
+//				File file = new File(imageDir, fileName);
+//
+//				try {
+//					fos = new FileOutputStream(file);
+//					Toast.makeText(getApplicationContext(), "Full 2", Toast.LENGTH_LONG).show();//display the response on screen
+//				} catch (Exception e) {
+//					Toast.makeText(this, "Shine2", Toast.LENGTH_LONG).show();
+//				}
+
+
+			}
+		}
+		catch (Exception e) {
+			Toast.makeText(this, "Shine", Toast.LENGTH_LONG).show();
+		}
+	}
 }
