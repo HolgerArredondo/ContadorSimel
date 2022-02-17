@@ -49,10 +49,21 @@ public class _MainActivity extends AppCompatActivity {
     private String URLGPS = "http://calidad-de-vida.org/dei/envio/gpsContador.php";
     private String URLPOST = "http://calidad-de-vida.org/dei/envio/envioTabletContadorV2Simel.php";
 
-    int i = 0;
+    //int i = 0;
     boolean aux = false;
 
-
+    int[] i = {0};
+    int[] c = {0};
+    boolean[] j = {false};
+    int sizeBkp;
+    HashMap<String, String> inputs;
+    Db db;
+    ProgressDialog progressBkp;
+    Handler cambio;
+    Handler mihand;
+    Handler handle;
+    int size;
+    ProgressDialog progressCyan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,168 +90,290 @@ public class _MainActivity extends AppCompatActivity {
         btnRequest = (Button) findViewById(R.id.buttonRequest);
 //
 
-        btnRequest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                final ProgressDialog progressBkp = new ProgressDialog(_MainActivity.this);
-                final ProgressDialog progressCyan = new ProgressDialog(_MainActivity.this);
-                final Handler mihand = new Handler();
-
-                progressBkp.setCancelable(false);
-                progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
-                progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressBkp.show();
-
-                int size = 100;
-                int sizeGps = 50;
-                final Handler cambio = new Handler() {
-                    public void handleMessage(Message msg) {
-                        progressCyan.setCancelable(false);
-                        progressCyan.setMessage("Enviando");
-                        progressCyan
-                                .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressCyan.setProgress(0);
-                        progressCyan.setMax(size);
-                        progressCyan.setProgressNumberFormat(null);
-                        progressCyan.show();
-                    }
-                };
-
-                final Handler handle = new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        progressCyan.incrementProgressBy(1);
-                    }
-                };
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i=1;i<5;i++){
-                            // the thread will sleep for the 500 milli seconds
-                            try {
-                                Thread.sleep(500);
-                            }
-                            catch(InterruptedException e) {
-                                System.out.println(e);
-                            }
-                            System.out.println(i);
-                        }
-
-                        if (sizeGps > 0) {
-                            for(int i = 0; i < sizeGps; i++){
-                                // the thread will sleep for the 500 milli seconds
-                                try {
-                                    Thread.sleep(500);
-                                }
-                                catch(InterruptedException e) {
-                                    System.out.println(e);
-                                }
-                                System.out.println("gps: " + i);
-                            }
-                        }
-
-                        progressBkp.dismiss();
-                        cambio.sendEmptyMessage(0);
-
-                        for(int i = 0; i < size; i++) {
-                            try {
-                                Thread.sleep(500);
-                                handle.sendMessage(handle.obtainMessage());
-                            }
-                            catch(InterruptedException e) {
-                                System.out.println(e);
-                            }
-                        }
-
-
-                        progressCyan.dismiss();
-                        mihand.post(imprimeThread("Envio exitoso."));
-                    }
-                }).start();
-            }
-        });
 //        btnRequest.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public void onClick(View v){
+//            public void onClick(View view) {
 //
-//                boolean connected = false;
-//                ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-//                if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-//                        connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-//                    //we are connected to a network
-//                    connected = true;
-//                }
-//                else
-//                    connected = false;
-//                if (connected) {
-//                    i = 0;
-//                    Db db = new Db(ourContext);
+//                final ProgressDialog progressBkp = new ProgressDialog(_MainActivity.this);
+//                final ProgressDialog progressCyan = new ProgressDialog(_MainActivity.this);
+//                final Handler mihand = new Handler();
 //
-//                    final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
-//                    //		final ArrayList<String> idJornadasGps = db.getJornadasGps();
-//                    final int sizeBkp = idJornadasBkp.size();
-//                    final int size = db.getCountTbl();
-//                    Log.i("size", "" + size);
-//                    if (sizeBkp > 0) {
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                do {
-//                                    final HashMap<String, List<String>> data = db
-//                                            .selectCuestionario("4", "");
+//                progressBkp.setCancelable(false);
+//                progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
+//                progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//                progressBkp.show();
 //
-//                                    String tablet = db.getLastExistentField("tablet");
-//                                    String idJornada = data.get("idJornada").get(0).toString();
-//                                    String clave = data.get("clave").get(0).toString();
-//                                    String fecha = data.get("fecha").get(0).toString();
-//                                    String app = data.get("app").get(0).toString();
-//
-//                                    HashMap<String, String> inputs = new HashMap<String, String>();
-//                                    inputs.put("resultado", data
-//                                            .get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()"));
-//                                    inputs.put("tablet", tablet);
-//                                    inputs.put("idJornada", idJornada);
-//                                    inputs.put("clave", clave);
-//                                    inputs.put("fecha", fecha);
-//                                    inputs.put("app", app);
-//                                    inputs.put("id", data.get("id").get(0).toString());
-//
-//                                    //System.out.println(Arrays.asList(inputs));
-//                                    try {
-//
-//                                        sendAndRequestResponse(inputs);
-////                                            Db db = new Db(ourContext);
-//                                            db.setMarked(inputs.get("id").toString());
-//
-//
-//                                    } catch (Exception error1) {
-//                                        i = size;
-//                                        Toast.makeText(getApplicationContext(),"Error 1:" + error1.toString(), Toast.LENGTH_LONG).show();
-//                                    };
-//                                    i++;
-//                                } while (i < size);
-//
-//                               // Thread.interrupted();
-//                            }
-//                        }).start();
+//                int size = 10;
+//                int sizeGps = 10;
+//                final Handler cambio = new Handler() {
+//                    public void handleMessage(Message msg) {
+//                        progressCyan.setCancelable(false);
+//                        progressCyan.setMessage("Enviando");
+//                        progressCyan
+//                                .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//                        progressCyan.setProgress(0);
+//                        progressCyan.setMax(size);
+//                        progressCyan.setProgressNumberFormat(null);
+//                        progressCyan.show();
 //                    }
+//                };
+//
+//                final Handler handle = new Handler() {
+//                    @Override
+//                    public void handleMessage(Message msg) {
+//                        progressCyan.incrementProgressBy(1);
+//                    }
+//                };
+//
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        for(int i=1;i<1;i++){
+//                            // the thread will sleep for the 500 milli seconds
+//                            try {
+//                                Thread.sleep(500);
+//                            }
+//                            catch(InterruptedException e) {
+//                                System.out.println(e);
+//                            }
+//                            System.out.println(i);
+//                        }
+//
+////
+////                        if (sizeGps > 0) {
+////                            for(int i = 0; i < sizeGps; i++){
+////                                // the thread will sleep for the 500 milli seconds
+////                                try {
+////                                    Thread.sleep(500);
+////                                }
+////                                catch(InterruptedException e) {
+////                                    System.out.println(e);
+////                                }
+////                                System.out.println("gps: " + i);
+////                            }
+////                        }
+////
+////                        progressBkp.dismiss();
+////                        cambio.sendEmptyMessage(0);
+////
+////                        for(int i = 0; i < size; i++) {
+////                            try {
+////                                Thread.sleep(500);
+////                                handle.sendMessage(handle.obtainMessage());
+////                            }
+////                            catch(InterruptedException e) {
+////                                System.out.println(e);
+////                            }
+////                        }
 //
 //
-//
-//
-//
-//
-//
-//
-////                    sendAndRequestResponse();
-//                }
-//                else
-//                    Toast.makeText(getApplicationContext(),"No hay conexión a Internet:", Toast.LENGTH_LONG).show();//display the response on screen
-//
+//                        progressCyan.dismiss();
+//                        mihand.post(imprimeThread("Envio exitoso."));
+//                    }
+//                }).start();
 //            }
 //        });
+        btnRequest.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v){
+
+                final boolean[] connected = {checkInternetConnection(ourContext)};
+
+                if (connected[0]) {
+
+                    db = new Db(ourContext);
+                    final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
+                    //		final ArrayList<String> idJornadasGps = db.getJornadasGps();
+                    sizeBkp = idJornadasBkp.size();
+
+
+                    if (sizeBkp > 0) {
+
+
+                        size = db.getCountTbl();
+                        Log.i("size", "" + size);
+                        progressCyan = new ProgressDialog(ourContext);
+                        mihand = new Handler();
+                        cambio = new Handler() {
+                            public void handleMessage(Message msg) {
+                                progressCyan.setCancelable(false);
+                                progressCyan.setMessage("Enviando");
+                                progressCyan
+                                        .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                                progressCyan.setProgress(0);
+                                progressCyan.setMax(size);
+                                progressCyan.setProgressNumberFormat(null);
+                                progressCyan.show();
+                            }
+                        };
+
+                        handle = new Handler() {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                progressCyan.incrementProgressBy(1);
+                            }
+                        };
+
+
+                        progressBkp = new ProgressDialog(_MainActivity.this);
+                        progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
+                        progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        progressBkp.show();
+
+                        // i = 0;
+
+
+
+
+                        Log.i("sizeBkp", "" + sizeBkp);
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
+
+                                boolean k = false;
+                                boolean l = false;
+                                boolean m = false;
+                                boolean n = false;
+                                boolean o = false;
+
+                                //bkp
+                                Log.i("sizeBkp", "" + sizeBkp);
+
+                                mRequestQueue = Volley.newRequestQueue(ourContext);
+
+                                //     do {
+
+
+
+                                //  Log.i("bkp " + i[0], resp.toString());
+
+
+
+                                //System.out.println(Arrays.asList(inputs));
+                                try {
+
+
+
+
+                                    envioBkp();
+
+                                    //    db.setMarked(inputs.get("id").toString());
+
+
+                                } catch (Exception error1) {
+                                    i[0] = sizeBkp;
+                                    Log.i("Error 1:", error1.toString());
+//                                        System.out.println("Error 1:" + error1.toString());
+                                    j[0] = true;
+                                    progressBkp.dismiss();
+
+                                    //Toast.makeText(getApplicationContext(),"Error 1:" + error1.toString(), Toast.LENGTH_LONG).show();
+                                };
+                                // i[0]++;
+                                //  } while (i[0] < sizeBkp);
+
+                                if(j[0]) {
+                                    progressBkp.dismiss();
+                                }
+                                //envio los contadores
+                                else {
+//                                    progressBkp.dismiss();
+//                                    i[0] = 0;
+//                                    cambio.sendEmptyMessage(0);
+//
+//                                    //fin bkp
+//                                    do {
+//                                        final HashMap<String, List<String>> data = db
+//                                                .selectCuestionario("4", "");
+//
+//                                        String tablet = db.getLastExistentField("tablet");
+//                                        String idJornada = data.get("idJornada").get(0).toString();
+//                                        String clave = data.get("clave").get(0).toString();
+//                                        String fecha = data.get("fecha").get(0).toString();
+//                                        String app = data.get("app").get(0).toString();
+//
+//                                        HashMap<String, String> inputs = new HashMap<String, String>();
+//                                        inputs.put("resultado", data
+//                                                .get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()"));
+//                                        inputs.put("tablet", tablet);
+//                                        inputs.put("idJornada", idJornada);
+//                                        inputs.put("clave", clave);
+//                                        inputs.put("fecha", fecha);
+//                                        inputs.put("app", app);
+//                                        inputs.put("id", data.get("id").get(0).toString());
+//
+//                                        //System.out.println(Arrays.asList(inputs));
+//                                        try {
+//
+//                                            //mRequestQueue = Volley.newRequestQueue(this);
+//                                            mStringRequest = new StringRequest(Request.Method.POST, URLVOLLEY, new Response.Listener<String>() {
+//                                                @Override
+//                                                public void onResponse(String response) {
+//                                                  //  Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+//
+//                                                    c[0]++;
+//                                                    db.setMarked(data.get("id").get(0).toString());
+//                                                    handle.sendMessage(handle.obtainMessage());
+//                                                    i[0]++;
+//
+//
+//                                                }
+//                                            }, new Response.ErrorListener() {
+//                                                @Override
+//                                                public void onErrorResponse(VolleyError error) {
+//                                                  //  Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+//
+//                                                    i[0] = size;
+//                                                }
+//                                            }){
+//                                                @Override
+//                                                protected Map<String,String> getParams(){
+//
+//                                                    Map<String,String> params = inputs;
+//                                                    return params;
+//                                                }
+//                                            };
+//
+//                                            mRequestQueue.add(mStringRequest);
+//
+//
+//    //                                            Db db = new Db(ourContext);
+//                                               // db.setMarked(inputs.get("id").toString());
+//
+//
+//                                        } catch (Exception error1) {
+//                                            i[0] = size;
+//                                            System.out.println("Error final" + error1.toString());
+//                                            //Toast.makeText(getApplicationContext(),"Error 1:" + error1.toString(), Toast.LENGTH_LONG).show();
+//                                        };
+//                                     //   i[0]++;
+//                                    } while (i[0] < size);
+//                                    progressCyan.dismiss();
+
+                                }
+                                // Thread.interrupted();
+                            }
+                        }).start();
+                    }
+
+
+
+
+
+
+
+
+//                    sendAndRequestResponse();
+                }
+                else
+                    Toast.makeText(getApplicationContext(),"No hay conexión a Internet:", Toast.LENGTH_LONG).show();//display the response on screen
+
+            }
+        });
 
         /**
          * GPS
@@ -348,7 +481,8 @@ public class _MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.out.println(TAG + " " + "Error :" + error.toString());
+                Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+//                System.out.println(TAG + " " + "Error :" + error.toString());
 //                Log.i(TAG,"Error :" + error.toString());
                 //   aux = false;
             }
@@ -369,6 +503,34 @@ public class _MainActivity extends AppCompatActivity {
         //  return aux;
     }
 
+
+    private void sendAndRequestResponseBkp(String url, HashMap<String, String> inputs) {
+
+        mRequestQueue = Volley.newRequestQueue(this);
+
+
+        mStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+            }
+        }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = inputs;
+                return params;
+            }
+        };
+
+        mRequestQueue.add(mStringRequest);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -384,5 +546,155 @@ public class _MainActivity extends AppCompatActivity {
             }
         };
         return trono;
+    }
+
+    public static boolean checkInternetConnection(Context context) {
+        try
+        {
+            ConnectivityManager conMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            if (conMgr.getActiveNetworkInfo() != null && conMgr.getActiveNetworkInfo().isAvailable() && conMgr.getActiveNetworkInfo().isConnected())
+                return true;
+            else
+                return false;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
+
+        return false;
+    }
+    public void envioBkp() {
+        url = "http://elcolef.net/Emif/envio/respaldoContador_17.php";
+
+        final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
+        ArrayList<String> resp = db.selectRespaldo(idJornadasBkp.get(i[0]));
+
+        inputs = new HashMap<String, String>();
+
+        inputs.put("resultado", resp.toString());
+        inputs.put("idJornada", idJornadasBkp.get(i[0]));
+
+        mStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+                Log.i("i antes", "" + i[0]);
+                i[0]++;
+                Log.i("i despues", "" + i[0]);
+
+                if(i[0] < sizeBkp)
+                    envioBkp();
+                else {
+                    //progressBkp.dismiss();
+                    i[0] = 0;
+                    envioContador();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                i[0] = sizeBkp;
+                j[0] = true;
+                // Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+            }
+        }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = inputs;
+                return params;
+            }
+        };
+
+        mRequestQueue.add(mStringRequest);
+    }
+
+    public void envioContador() {
+
+            progressBkp.dismiss();
+
+            cambio.sendEmptyMessage(0);
+
+            //fin bkp
+//            do {
+                final HashMap<String, List<String>> data = db
+                        .selectCuestionario("4", "");
+
+                String tablet = db.getLastExistentField("tablet");
+                String idJornada = data.get("idJornada").get(0).toString();
+                String clave = data.get("clave").get(0).toString();
+                String fecha = data.get("fecha").get(0).toString();
+                String app = data.get("app").get(0).toString();
+
+                HashMap<String, String> inputs = new HashMap<String, String>();
+                inputs.put("resultado", data
+                        .get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()"));
+                inputs.put("tablet", tablet);
+                inputs.put("idJornada", idJornada);
+                inputs.put("clave", clave);
+                inputs.put("fecha", fecha);
+                inputs.put("app", app);
+                inputs.put("id", data.get("id").get(0).toString());
+
+                //System.out.println(Arrays.asList(inputs));
+                try {
+
+                    //mRequestQueue = Volley.newRequestQueue(this);
+                    mStringRequest = new StringRequest(Request.Method.POST, URLVOLLEY, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                          //  Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+                            c[0]++;
+                            db.setMarked(data.get("id").get(0).toString());
+                            handle.sendMessage(handle.obtainMessage());
+                            i[0]++;
+                            Log.i("envioContador i: ", "" + i[0]);
+
+                            if(i[0] < size)
+                                envioContador();
+                            else {
+                                progressCyan.dismiss();
+                                mihand.post(imprimeThread("Envio exitoso."));
+                            }
+
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                          //  Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+                            progressCyan.dismiss();
+                            i[0] = size;
+                        }
+                    }){
+                        @Override
+                        protected Map<String,String> getParams(){
+
+                            Map<String,String> params = inputs;
+                            return params;
+                        }
+                    };
+
+                    mRequestQueue.add(mStringRequest);
+
+
+//                                            Db db = new Db(ourContext);
+                       // db.setMarked(inputs.get("id").toString());
+
+
+                } catch (Exception error1) {
+                    i[0] = size;
+                    System.out.println("Error final" + error1.toString());
+                    progressCyan.dismiss();
+                    //Toast.makeText(getApplicationContext(),"Error 1:" + error1.toString(), Toast.LENGTH_LONG).show();
+                };
+             //   i[0]++;
+//            } while (i[0] < size);
+           // progressCyan.dismiss();
     }
 }
