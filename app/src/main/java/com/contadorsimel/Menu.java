@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 import android.Manifest;
@@ -34,6 +35,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -42,6 +51,23 @@ public class Menu extends AppCompatActivity {
 	Context ourContext = Menu.this;
 	Activity ourActivity = this;
 	Db db = new Db(ourContext);
+
+
+	int[] i = {0};
+	int[] c = {0};
+	boolean[] j = {false};
+	int sizeBkp;
+	HashMap<String, String> inputs;
+
+	ProgressDialog progressBkp;
+	Handler cambio;
+	Handler mihand;
+	Handler handle;
+	int size;
+	ProgressDialog progressCyan;
+	private RequestQueue mRequestQueue;
+	private StringRequest mStringRequest;
+
 //	LocationManager locationManager;
 //	String provider;
 
@@ -98,7 +124,7 @@ public class Menu extends AppCompatActivity {
 
 			public void onClick(View v) {
 //				send(btn1);
-//				send();
+				send();
 			}
 		});
 
@@ -1231,4 +1257,254 @@ public class Menu extends AppCompatActivity {
 //		this.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD);
 //	}
 
+
+	public void send() {
+		final boolean[] connected = {checkInternetConnection(ourContext)};
+
+		if (connected[0]) {
+
+			db = new Db(ourContext);
+			final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
+			//		final ArrayList<String> idJornadasGps = db.getJornadasGps();
+			sizeBkp = idJornadasBkp.size();
+
+
+			if (sizeBkp > 0) {
+
+
+				size = db.getCountTbl();
+				Log.i("size", "" + size);
+				progressCyan = new ProgressDialog(ourContext);
+				mihand = new Handler();
+				cambio = new Handler() {
+					public void handleMessage(Message msg) {
+						progressCyan.setCancelable(false);
+						progressCyan.setMessage("Enviando");
+						progressCyan
+								.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+						progressCyan.setProgress(0);
+						progressCyan.setMax(size);
+						progressCyan.setProgressNumberFormat(null);
+						progressCyan.show();
+					}
+				};
+
+				handle = new Handler() {
+					@Override
+					public void handleMessage(Message msg) {
+						progressCyan.incrementProgressBy(1);
+					}
+				};
+
+
+				progressBkp = new ProgressDialog(ourContext);
+				progressBkp.setMessage("Preparando envio. Puede tardar varios segundos ...");
+				progressBkp.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				progressBkp.show();
+
+				// i = 0;
+
+
+
+
+				Log.i("sizeBkp", "" + sizeBkp);
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+
+						boolean k = false;
+						boolean l = false;
+						boolean m = false;
+						boolean n = false;
+						boolean o = false;
+
+						//bkp
+						Log.i("sizeBkp", "" + sizeBkp);
+
+						mRequestQueue = Volley.newRequestQueue(ourContext);
+
+						try {
+							envioBkp();
+						}
+						catch (Exception error1) {
+							i[0] = sizeBkp;
+							Log.i("Error 1:", error1.toString());
+                          j[0] = true;
+							progressBkp.dismiss();
+
+						};
+
+						if(j[0]) {
+							progressBkp.dismiss();
+						}
+						//envio los contadores
+						else {
+
+						}
+
+					}
+				}).start();
+			}
+			else
+				Toast.makeText(ourContext, "No hay folios para enviar.", Toast.LENGTH_LONG).show();
+		}
+		else
+			Toast.makeText(getApplicationContext(),"No hay conexión a Internet:", Toast.LENGTH_LONG).show();//display the response on screen
+	}
+
+	public void envioBkp() {
+		String url = "http://elcolef.net/Emif/envio/respaldoContador_17.php";
+
+		final ArrayList<String> idJornadasBkp = db.getJornadasBkp();
+		ArrayList<String> resp = db.selectRespaldo(idJornadasBkp.get(i[0]));
+
+		inputs = new HashMap<String, String>();
+
+		inputs.put("resultado", resp.toString());
+		inputs.put("idJornada", idJornadasBkp.get(i[0]));
+
+		mStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				//Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+				Log.i("i antes", "" + i[0]);
+				i[0]++;
+				Log.i("i despues", "" + i[0]);
+
+				if(i[0] < sizeBkp)
+					envioBkp();
+				else {
+					//progressBkp.dismiss();
+					i[0] = 0;
+					progressBkp.dismiss();
+
+					cambio.sendEmptyMessage(0);
+					envioContador();
+				}
+
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				i[0] = sizeBkp;
+				j[0] = true;
+				// Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+			}
+		}){
+			@Override
+			protected Map<String,String> getParams(){
+				Map<String,String> params = inputs;
+				return params;
+			}
+		};
+
+		mRequestQueue.add(mStringRequest);
+	}
+
+	public void envioContador() {
+
+
+
+		//fin bkp
+//            do {
+		final HashMap<String, List<String>> data = db
+				.selectCuestionario("4", "");
+
+		String tablet = db.getLastExistentField("tablet");
+		String idJornada = data.get("idJornada").get(0).toString();
+		String clave = data.get("clave").get(0).toString();
+		String fecha = data.get("fecha").get(0).toString();
+		String app = data.get("app").get(0).toString();
+
+		HashMap<String, String> inputs = new HashMap<String, String>();
+		inputs.put("resultado", data
+				.get("resultado").get(0).toString().toString().replace("'fechaEnvio'", "now()"));
+		inputs.put("tablet", tablet);
+		inputs.put("idJornada", idJornada);
+		inputs.put("clave", clave);
+		inputs.put("fecha", fecha);
+		inputs.put("app", app);
+		inputs.put("id", data.get("id").get(0).toString());
+
+		final String URLVOLLEY = "http://calidad-de-vida.org/dei/envio/envioTabletContadorV2Simel.php";
+
+		//System.out.println(Arrays.asList(inputs));
+		try {
+
+			//mRequestQueue = Volley.newRequestQueue(this);
+			mStringRequest = new StringRequest(Request.Method.POST, URLVOLLEY, new Response.Listener<String>() {
+				@Override
+				public void onResponse(String response) {
+					//  Toast.makeText(getApplicationContext(),"Response 2:" + inputs.get("id").toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+					c[0]++;
+					db.setMarked(data.get("id").get(0).toString());
+					handle.sendMessage(handle.obtainMessage());
+					i[0]++;
+					Log.i("envioContador i: ", "" + i[0]);
+
+					if(i[0] < size)
+						envioContador();
+					else {
+						progressCyan.dismiss();
+						mihand.post(imprimeThread("Envio exitoso."));
+					}
+
+
+				}
+			}, new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					//  Toast.makeText(getApplicationContext(),"Error 2:" + error.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+					progressCyan.dismiss();
+					i[0] = size;
+				}
+			}){
+				@Override
+				protected Map<String,String> getParams(){
+
+					Map<String,String> params = inputs;
+					return params;
+				}
+			};
+
+			mRequestQueue.add(mStringRequest);
+
+
+//                                            Db db = new Db(ourContext);
+			// db.setMarked(inputs.get("id").toString());
+
+
+		} catch (Exception error1) {
+			i[0] = size;
+			System.out.println("Error final" + error1.toString());
+			progressCyan.dismiss();
+			//Toast.makeText(getApplicationContext(),"Error 1:" + error1.toString(), Toast.LENGTH_LONG).show();
+		};
+		//   i[0]++;
+//            } while (i[0] < size);
+		// progressCyan.dismiss();
+	}
+
+	public static boolean checkInternetConnection(Context context) {
+		try
+		{
+			ConnectivityManager conMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+			if (conMgr.getActiveNetworkInfo() != null && conMgr.getActiveNetworkInfo().isAvailable() && conMgr.getActiveNetworkInfo().isConnected())
+				return true;
+			else
+				return false;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		return false;
+	}
 }

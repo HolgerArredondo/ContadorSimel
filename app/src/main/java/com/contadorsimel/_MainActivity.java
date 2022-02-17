@@ -591,6 +591,9 @@ public class _MainActivity extends AppCompatActivity {
                 else {
                     //progressBkp.dismiss();
                     i[0] = 0;
+                    progressBkp.dismiss();
+
+                    cambio.sendEmptyMessage(0);
                     envioContador();
                 }
 
@@ -615,9 +618,7 @@ public class _MainActivity extends AppCompatActivity {
 
     public void envioContador() {
 
-            progressBkp.dismiss();
 
-            cambio.sendEmptyMessage(0);
 
             //fin bkp
 //            do {

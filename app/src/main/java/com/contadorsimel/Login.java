@@ -18,16 +18,30 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -36,7 +50,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -46,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -57,6 +74,7 @@ public class Login extends AppCompatActivity {
 	String provider;
 	TextView txtMsg;
 	Button btnUpdate;
+	private LocationRequest locationRequest;
 
 	private static final int REQ_ENTER_PATTERN = 2;
 
@@ -80,6 +98,9 @@ public class Login extends AppCompatActivity {
 //		});
 
 		setContentView(R.layout.login);
+
+
+
 
 //		setContentView(R.layout.cu_botones_8_2);
 //
@@ -116,20 +137,82 @@ public class Login extends AppCompatActivity {
 //
 //		setContentView(R.layout.login);
 //////
-		txtMsg = (TextView) findViewById(R.id.toSend);
-		txtMsg.setTextColor(Color.RED);
-		txtMsg.setText("");
-		btnUpdate = (Button) findViewById(R.id.btnUpdate);
-////
-		btnUpdate.setVisibility(View.GONE);
+
+
+
+
+
+
+		Button btnLogin = (Button) findViewById(R.id.btn_login);
+		TextView tv = (TextView) findViewById(R.id.toSend);
+
+
+		locationRequest = LocationRequest.create();
+		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		locationRequest.setInterval(5000);
+		locationRequest.setFastestInterval(2000);
+
+
+		btnLogin.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+					Log.i("info", "entro a skd> =");
+
+					if (ActivityCompat.checkSelfPermission(Login.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+						Log.i("info", "entro checkSelfPermission");
+
+						if (isGPSEnabled()) {
+							Log.i("info", "isGPSEnabled");
+
+							LocationServices.getFusedLocationProviderClient(Login.this)
+										.requestLocationUpdates(locationRequest, new LocationCallback() {
+											@Override
+											public void onLocationResult(@NonNull LocationResult locationResult) {
+												super.onLocationResult(locationResult);
+
+												LocationServices.getFusedLocationProviderClient(Login.this)
+														.removeLocationUpdates(this);
+
+												if (locationResult != null && locationResult.getLocations().size() >0){
+
+													int index = locationResult.getLocations().size() - 1;
+													double latitude = locationResult.getLocations().get(index).getLatitude();
+													double longitude = locationResult.getLocations().get(index).getLongitude();
+
+													tv.setText("Latitude: "+ latitude + "\n" + "Longitude: "+ longitude);
+												}
+											}
+										}, Looper.getMainLooper());
+
+							} else {
+								turnOnGPS();
+							}
+
+					} else {
+						requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+					}
+				}
+			}
+		});
+
+
+
+//		txtMsg = (TextView) findViewById(R.id.toSend);
+//		txtMsg.setTextColor(Color.RED);
+//		txtMsg.setText("");
+//		btnUpdate = (Button) findViewById(R.id.btnUpdate);
 //////
-		if (Integer.parseInt(db.getRow("tblContadorSimel", "COUNT(*)", "marked", "0")) > 0)
-			blink("EXISTEN FOLIOS PENDIENTES POR ENVIAR.");
-//		else {
-//			//txt.setText("");
-//			checkUpdate();
-//		}
-		loginCheck();
+//		btnUpdate.setVisibility(View.GONE);
+////////
+//		if (Integer.parseInt(db.getRow("tblContadorSimel", "COUNT(*)", "marked", "0")) > 0)
+//			blink("EXISTEN FOLIOS PENDIENTES POR ENVIAR.");
+////		else {
+////			//txt.setText("");
+////			checkUpdate();
+////		}
+//		loginCheck();
 
 	}
 
@@ -428,5 +511,59 @@ public class Login extends AppCompatActivity {
 		catch (Exception e) {
 			Toast.makeText(this, "Shine", Toast.LENGTH_LONG).show();
 		}
+	}
+	private void turnOnGPS() {
+
+
+
+		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+				.addLocationRequest(locationRequest);
+		builder.setAlwaysShow(true);
+
+		Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(getApplicationContext())
+				.checkLocationSettings(builder.build());
+
+		result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+			@Override
+			public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+
+				try {
+					LocationSettingsResponse response = task.getResult(ApiException.class);
+					Toast.makeText(ourContext, "GPS is already tured on", Toast.LENGTH_SHORT).show();
+
+				} catch (ApiException e) {
+
+					switch (e.getStatusCode()) {
+						case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+							try {
+								ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+								resolvableApiException.startResolutionForResult(Login.this, 2);
+							} catch (IntentSender.SendIntentException ex) {
+								ex.printStackTrace();
+							}
+							break;
+
+						case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+							//Device does not have location
+							break;
+					}
+				}
+			}
+		});
+
+	}
+	
+	private boolean isGPSEnabled() {
+		LocationManager locationManager = null;
+		boolean isEnabled = false;
+
+		if (locationManager == null) {
+			locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		}
+
+		isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		return isEnabled;
+
 	}
 }
